@@ -34,8 +34,23 @@ def can_seat_vips(n, m, pairs):
 
 # Ввод данных
 N, M = map(int, input().strip().split())
-pairs = [tuple(map(int, input().strip().split())) for _ in range(M)]
+pairs = [tuple(input().strip().split()) for _ in range(M)]
+
+# Создаем отображение от символов к индексам
+char_to_index = {}
+index = 0
+
+for u, v in pairs:
+    if u not in char_to_index:
+        char_to_index[u] = index
+        index += 1
+    if v not in char_to_index:
+        char_to_index[v] = index
+        index += 1
+
+# Преобразуем пары в индексы
+indexed_pairs = [(char_to_index[u], char_to_index[v]) for u, v in pairs]
 
 # Проверка возможности рассадки ОВП
-result = can_seat_vips(N, M, pairs)
+result = can_seat_vips(len(char_to_index), M, indexed_pairs)
 print(result)
