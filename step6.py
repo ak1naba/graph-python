@@ -46,8 +46,23 @@ def find_bridges(n, edges):
 
 # Ввод данных
 N, M = map(int, input().strip().split())
-edges = [tuple(map(int, input().strip().split())) for _ in range(M)]
+edges = [tuple(input().strip().split()) for _ in range(M)]
+
+# Создаем отображение от символов к индексам
+char_to_index = {}
+index = 0
+
+for u, v in edges:
+    if u not in char_to_index:
+        char_to_index[u] = index
+        index += 1
+    if v not in char_to_index:
+        char_to_index[v] = index
+        index += 1
+
+# Преобразуем пары в индексы
+indexed_edges = [(char_to_index[u], char_to_index[v]) for u, v in edges]
 
 # Проверка количества мостов в графе
-result = find_bridges(N, edges)
+result = find_bridges(len(char_to_index), indexed_edges)
 print(result)
