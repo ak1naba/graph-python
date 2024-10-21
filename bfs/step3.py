@@ -1,6 +1,5 @@
 from collections import deque
 
-
 def bfs(graph, start):
     queue = deque([start])
     visited = {start: 0}  # хранит расстояние от стартовой вершины
@@ -22,7 +21,6 @@ def bfs(graph, start):
                     farthest_vertex = neighbor
 
     return farthest_vertex, max_distance
-
 
 def main():
     # Чтение входных данных
@@ -46,6 +44,5 @@ def main():
     # Вывод результата в порядке возрастания
     result = sorted([farthest_from_start, farthest_vertex])
     print(result[0], result[1])
-
 
 main()
