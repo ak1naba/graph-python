@@ -2,47 +2,39 @@ from collections import deque
 
 def bfs(graph, start):
     queue = deque([start])
-    visited = {start: 0}  # хранит расстояние от стартовой вершины
+    visited = {start: 0}
     farthest_vertex = start
-    max_distance = 0
 
     while queue:
         current_vertex = queue.popleft()
-        current_distance = visited[current_vertex]
 
         for neighbor in graph[current_vertex]:
             if neighbor not in visited:
-                visited[neighbor] = current_distance + 1
+                visited[neighbor] = visited[current_vertex] + 1
                 queue.append(neighbor)
+                farthest_vertex = neighbor  # Обновляем самую удалённую вершину
 
-                # Обновляем максимальное расстояние и соответствующую вершину
-                if visited[neighbor] > max_distance:
-                    max_distance = visited[neighbor]
-                    farthest_vertex = neighbor
-
-    return farthest_vertex, max_distance
+    # Возвращаем самую удалённую вершину и её расстояние
+    return farthest_vertex, visited[farthest_vertex]
 
 def main():
-    # Чтение входных данных
-    first_line = input().strip().split()
-    N, M = map(int, first_line)
-
+    N, M = map(int, input().strip().split())
     graph = {i: [] for i in range(N)}
 
     for _ in range(M):
         u, v = map(int, input().strip().split())
         graph[u].append(v)
-        graph[v].append(u)  # неориентированный граф
+        graph[v].append(u)
 
-    # Первый BFS для нахождения самой удалённой вершины от произвольной
-    arbitrary_start = 0
-    farthest_from_start, _ = bfs(graph, arbitrary_start)
+    # Первый BFS: найти самую удалённую вершину от 0
+    farthest_from_start, _ = bfs(graph, 0)
 
-    # Второй BFS для нахождения самой удалённой вершины от найденной
+    # Второй BFS: найти самую удалённую вершину от найденной
     farthest_vertex, _ = bfs(graph, farthest_from_start)
 
-    # Вывод результата в порядке возрастания
+    # Выводим вершины в порядке возрастания
     result = sorted([farthest_from_start, farthest_vertex])
     print(result[0], result[1])
 
+# Запуск основной функции
 main()
