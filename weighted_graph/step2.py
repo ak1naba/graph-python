@@ -1,48 +1,62 @@
+import sys
 import heapq
 
 
-def dijkstra(n, costs, graph):
-    min_costs = [float('inf')] * n
-    min_costs[0] = costs[0]  # Начальная стоимость
-    pq = [(costs[0], 0)]  # (стоимость, город)
+def solve():
+    # Чтение числа городов N
+    n = int(input().strip())
 
-    while pq:
-        current_cost, current_city = heapq.heappop(pq)
+    # Чтение стоимости посещения каждого города
+    taxes = list(map(int, input().strip().split()))
 
-        # Если достигли последнего города
-        if current_city == n - 1:
-            return current_cost
+    # Чтение количества дорог M
+    m = int(input().strip())
 
-        # Если текущая стоимость больше минимальной, пропускаем
-        if current_cost > min_costs[current_city]:
-            continue
-
-        # Проходим по всем соседям текущего города
-        for neighbor in graph[current_city]:
-            new_cost = current_cost + costs[neighbor]  # Учитываем налог на вход в соседний город
-            if new_cost < min_costs[neighbor]:
-                min_costs[neighbor] = new_cost
-                heapq.heappush(pq, (new_cost, neighbor))
-
-    return -1 if min_costs[n - 1] == float('inf') else min_costs[n - 1]
-
-
-def main():
-    n = int(input())  # Ввод количества городов
-    costs = list(map(int, input().split()))  # Ввод стоимости за посещение каждого города
-    m = int(input())  # Ввод количества дорог
-
-    # Создание графа
+    # Создаем граф в виде списка смежности
     graph = [[] for _ in range(n)]
 
+    # Чтение дорог и построение графа
     for _ in range(m):
-        u, v = map(int, input().split())
-        graph[u - 1].append(v - 1)  # Индексы городов начинаются с 0
-        graph[v - 1].append(u - 1)
+        u, v = map(int, input().strip().split())
+        # Приводим города к нумерации от 0 для удобства (Python индексация с 0)
+        u -= 1
+        v -= 1
+        # Дорога добавляется в обе стороны, так как граф неориентированный
+        graph[u].append(v)
+        graph[v].append(u)
 
-    result = dijkstra(n, costs, graph)
-    print(result)
+    # Алгоритм Дейкстры для поиска минимальной стоимости маршрута
+    def dijkstra(start, end):
+        # Массив для хранения минимальной стоимости до каждого города
+        min_cost = [float('inf')] * n
+        min_cost[start] = taxes[start]
+
+        # Очередь с приоритетом (куча)
+        pq = [(taxes[start], start)]  # (стоимость, город)
+
+        while pq:
+            current_cost, u = heapq.heappop(pq)
+
+            # Если текущая стоимость уже больше известной, пропускаем
+            if current_cost > min_cost[u]:
+                continue
+
+            # Проходим по соседям текущего города
+            for v in graph[u]:
+                new_cost = current_cost + taxes[v]
+                if new_cost < min_cost[v]:
+                    min_cost[v] = new_cost
+                    heapq.heappush(pq, (new_cost, v))
+
+        # Возвращаем минимальную стоимость до конечного города
+        return min_cost[end]
+
+    # Запуск алгоритма Дейкстры из 1-го города в N-й
+    result = dijkstra(0, n - 1)
+
+    # Если до конечного города добраться нельзя, выводим -1
+    print(result if result != float('inf') else -1)
 
 
-if __name__ == "__main__":
-    main()
+# Запуск решения
+solve()
