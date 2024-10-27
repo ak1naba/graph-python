@@ -1,58 +1,57 @@
-from collections import deque
+def find_cycle_dfs(graph, v, visited, parent, path):
+    visited[v] = True
+    path.append(v)
+
+    for neighbor in graph[v]:
+        if not visited[neighbor]:
+            if find_cycle_dfs(graph, neighbor, visited, v, path):
+                return True
+        elif neighbor != parent:
+            path.append(neighbor)
+            return True
+
+    path.pop()
+    return False
 
 
-def bfs_shortest_cycle(graph, start):
-    queue = deque([start])
-    visited = {start: None}  # хранит предшественников вершин
+def find_shortest_cycle(n, edges):
+    graph = [[] for _ in range(n)]
 
-    while queue:
-        current_vertex = queue.popleft()
-
-        for neighbor in graph[current_vertex]:
-            if neighbor not in visited:
-                visited[neighbor] = current_vertex
-                queue.append(neighbor)
-            elif neighbor != visited[current_vertex]:  # найден цикл
-                return reconstruct_cycle(visited, current_vertex, neighbor)
-
-    return None
-
-
-def reconstruct_cycle(visited, start, end):
-    cycle = []
-    cycle.append(end)
-
-    # Восстанавливаем путь от конечной вершины до стартовой
-    while start is not None:
-        cycle.append(start)
-        start = visited[start]
-
-    cycle.reverse()  # Переворачиваем для правильного порядка
-    return cycle
-
-
-def main():
-    # Чтение входных данных
-    first_line = input().strip().split()
-    N, M = map(int, first_line)
-
-    graph = {i: [] for i in range(N)}
-
-    for _ in range(M):
-        u, v = map(int, input().strip().split())
+    for u, v in edges:
         graph[u].append(v)
-        graph[v].append(u)  # неориентированный граф
+        graph[v].append(u)
 
-    # Поиск кратчайшего цикла
     shortest_cycle = None
-    for vertex in range(N):
-        shortest_cycle = bfs_shortest_cycle(graph, vertex)
-        if shortest_cycle:
-            break
 
-    # Вывод результата в порядке возрастания
-    if shortest_cycle:
-        print(" ".join(map(str, sorted(shortest_cycle))))
+    for start in range(n):
+        visited = [False] * n
+        path = []
+
+        if find_cycle_dfs(graph, start, visited, -1, path):
+            cycle_start = path[-1]
+            cycle = []
+            cycle_found = False
+
+            for node in reversed(path):
+                cycle.append(node)
+                if node == cycle_start and cycle_found:
+                    break
+                if node == cycle_start:
+                    cycle_found = True
+
+            unique_cycle = sorted(set(cycle))
+            if shortest_cycle is None or len(unique_cycle) < len(shortest_cycle):
+                shortest_cycle = unique_cycle
+
+    return shortest_cycle
 
 
-main()
+n, m = map(int, input().split())
+edges = [tuple(map(int, input().split())) for _ in range(m)]
+
+result = find_shortest_cycle(n, edges)
+
+if result:
+    print(" ".join(map(str, result)))
+else:
+    print("Цикл не найден")
