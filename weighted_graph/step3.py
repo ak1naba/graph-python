@@ -1,19 +1,25 @@
 from collections import defaultdict, deque
 
+
 def solve():
     # Чтение n и t
     n, max_time = map(int, input().strip().split())
 
     # Создаем граф: для каждой дороги храним (город, время, ограничение по весу)
     graph = defaultdict(list)
+
+    # Читаем все строки дорог из ввода
     while True:
         try:
-            u, v, time, weight_limit = map(int, input().strip().split())
+            line = input().strip()
+            if not line:
+                break  # Прерываем, если ввода больше нет
+            u, v, time, weight_limit = map(int, line.split())
             # Добавляем дороги в обе стороны
             graph[u].append((v, time, weight_limit))
             graph[v].append((u, time, weight_limit))
         except EOFError:
-            break  # Прерываем цикл, когда ввод заканчивается
+            break  # Прерываем цикл при конце ввода (в случае использования EOF)
 
     # Функция для проверки, можно ли перевезти груз `weight` за время ≤ max_time
     def can_transport(weight):
@@ -39,7 +45,7 @@ def solve():
         return False
 
     # Бинарный поиск по весу груза
-    left, right = 1, 10**6  # Веса в задаче от 1 до 1_000_000
+    left, right = 1, 10 ** 6  # Веса в задаче от 1 до 1_000_000
     answer = 0
 
     while left <= right:
@@ -52,6 +58,7 @@ def solve():
 
     # Выводим максимальный возможный вес
     print(answer)
+
 
 # Запуск решения
 solve()
