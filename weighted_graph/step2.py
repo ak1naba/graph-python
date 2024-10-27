@@ -48,8 +48,8 @@ def solve():
                     min_cost[v] = new_cost
                     heapq.heappush(pq, (new_cost, v))
 
-        # Возвращаем минимальную стоимость до конечного города
-        return min_cost[end]
+        # Возвращаем минимальную стоимость до конечного города без учета двойного старта
+        return min_cost[end] - taxes[start]
 
     # Запуск алгоритма Дейкстры из 1-го города в N-й
     result = dijkstra(0, n - 1)
