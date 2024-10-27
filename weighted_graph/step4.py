@@ -1,46 +1,44 @@
 from collections import defaultdict, deque
+import sys
+
 
 def solve():
-    # Чтение первой строки с начальной и конечной деревнями
-    start_village, target_village = map(int, input().strip().split())
+    # Чтение всех данных из ввода
+    input_data = sys.stdin.read().strip().splitlines()
 
-    # Граф для хранения рейсов: {деревня: [(время_выезда, след_деревня, время_прибытия)]}
+    # Чтение n и m
+    n, m = map(int, input_data[0].strip().split())
+
+    # Создаем граф
     graph = defaultdict(list)
 
-    # Чтение данных о рейсах
-    while True:
-        try:
-            dep_village, dep_time, arr_village, arr_time = map(int, input().strip().split())
-            graph[dep_village].append((dep_time, arr_village, arr_time))
-        except EOFError:
-            break  # Прерываем цикл, когда ввод заканчивается
+    # Чтение информации о рейсах
+    for line in input_data[1:]:
+        dep_village, dep_time, arr_village, arr_time = map(int, line.strip().split())
+        # Добавляем рейс в граф
+        graph[dep_village].append((dep_time, arr_village, arr_time))
 
-    # Очередь для BFS: (текущая деревня, текущее время)
-    queue = deque([(start_village, 0)])  # Начинаем с первой деревни и времени 0
-    visited = defaultdict(lambda: float('inf'))  # Храним минимальное время прибытия в деревню
-    visited[start_village] = 0
+    # Список для хранения минимального времени до каждой деревни
+    min_time = [float('inf')] * (n + 1)
+    min_time[n] = 0  # Время в деревне n равно 0
 
-    # Переменная для хранения минимального времени до целевой деревни
-    min_time = float('inf')
+    # Очередь для BFS: (текущее время, текущая деревня)
+    queue = deque([(0, n)])  # Начинаем с деревни n и времени 0
 
     while queue:
-        current_village, current_time = queue.popleft()
+        current_time, current_village = queue.popleft()
 
         # Проходим по всем рейсам из текущей деревни
-        for dep_time, next_village, arr_time in graph[current_village]:
-            # Если можем сесть на этот рейс (учитываем расписание)
-            if dep_time >= current_time and arr_time < visited[next_village]:
-                visited[next_village] = arr_time
+        for dep_time, arr_village, arr_time in graph[current_village]:
+            if current_time <= dep_time:  # Можно выехать на рейс
+                if arr_time < min_time[arr_village]:  # Если достигли деревни быстрее
+                    min_time[arr_village] = arr_time
+                    queue.append((arr_time, arr_village))
 
-                # Если дошли до конечной деревни, обновляем минимальное время
-                if next_village == target_village:
-                    min_time = min(min_time, arr_time)
+    # Проверяем минимальное время до деревни m
+    answer = min_time[m]
+    print(answer if answer != float('inf') else -1)
 
-                # Добавляем в очередь новый рейс для дальнейшего поиска
-                queue.append((next_village, arr_time))
-
-    # Выводим результат
-    print(min_time if min_time != float('inf') else -1)
 
 # Запуск решения
 solve()
