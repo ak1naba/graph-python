@@ -12,20 +12,23 @@ def min_travel_time(n, m, buses):
 
     # Инициализация очереди с приоритетом и посещенных узлов
     pq = []
-    # Начинаем с первого рейса: текущее время - это время отправления первого рейса
-    heapq.heappush(pq, (0, n))  # (время, деревня)
     visited = defaultdict(lambda: float('inf'))
-    visited[n] = 0
+
+    # Найдём минимальное время отправления из деревни n
+    min_departure = min((d for d, _, _ in graph[n]), default=None)
+    if min_departure is None:
+        return -1
+
+    # Начинаем с минимального времени отправления первого рейса из деревни n
+    heapq.heappush(pq, (min_departure, n))  # (время, деревня)
+    visited[n] = min_departure
 
     while pq:
         current_time, current_village = heapq.heappop(pq)
 
-        # Логи для отладки
-        print(f"Текущая деревня: {current_village}, текущее время: {current_time}")
-
         # Если мы достигли целевой деревни
         if current_village == m:
-            return current_time
+            return current_time - min_departure  # Вернём итоговое время поездки
 
         # Если текущее время больше уже посещенного времени для этой деревни
         if current_time > visited[current_village]:
@@ -33,18 +36,12 @@ def min_travel_time(n, m, buses):
 
         # Обработка всех рейсов из текущей деревни
         for departure_time, next_village, arrival_time in graph[current_village]:
-            print(
-                f"Проверяем рейс: {current_village} -> {next_village}, время отправления: {departure_time}, время прибытия: {arrival_time}")
             if current_time <= departure_time:  # Можно успеть на автобус
-                wait_time = departure_time - current_time  # Время ожидания до отправления
-                total_time = current_time + wait_time + (arrival_time - departure_time)
-
-                print(f"Время ожидания: {wait_time}, общее время до {next_village}: {total_time}")
+                total_time = arrival_time  # Сразу задаём общее время до прибытия
 
                 if total_time < visited[next_village]:  # Проверяем лучшее время для следующей деревни
                     visited[next_village] = total_time
                     heapq.heappush(pq, (total_time, next_village))
-                    print(f"Обновлено время для {next_village}: {total_time}")
 
     return -1
 
@@ -54,7 +51,6 @@ if __name__ == "__main__":
     input_data = sys.stdin.read().strip().splitlines()
 
     if not input_data:
-        print("Нет входных данных.")
         sys.exit(1)
 
     # Первая строка содержит n и m
@@ -70,9 +66,9 @@ if __name__ == "__main__":
             buses.append(list(map(int, line.split())))
 
     if not buses:
-        print("Нет рейсов автобусов.")
+        print(-1)
         sys.exit(1)
 
     # Вызов функции и вывод результата
     result = min_travel_time(n, m, buses)
-    print("Минимальное время:", result)
+    print(result)
