@@ -4,9 +4,8 @@ import sys
 
 
 def min_travel_time(n, m, buses):
+    # Создаём граф для хранения рейсов между деревнями
     graph = defaultdict(list)
-
-    # Заполнение графа
     for start_village, departure_time, end_village, arrival_time in buses:
         graph[start_village].append((departure_time, end_village, arrival_time))
 
@@ -14,32 +13,38 @@ def min_travel_time(n, m, buses):
     pq = []
     visited = defaultdict(lambda: float('inf'))
 
-    # Запускаем поиск от деревни n с минимальным временем отправления
-    initial_departure = min((d for d, _, _ in graph[n]), default=None)
-    if initial_departure is None:
+    # Находим минимальное время отправления из деревни n
+    initial_departures = [d for d, _, _ in graph[n]]
+    if not initial_departures:
         return -1
+    min_departure = min(initial_departures)
 
-    # Добавляем минимальное время отправления как стартовое
-    heapq.heappush(pq, (initial_departure, n))
-    visited[n] = initial_departure
+    # Начинаем с минимального времени отправления из деревни n
+    heapq.heappush(pq, (min_departure, n))
+    visited[n] = min_departure
 
     while pq:
         current_time, current_village = heapq.heappop(pq)
 
-        # Если достигли целевой деревни, возвращаем время поездки
+        # Если достигли целевой деревни, возвращаем результат
         if current_village == m:
-            return current_time - initial_departure
+            return current_time - min_departure
 
-        # Обработка всех рейсов из текущей деревни
+        # Если текущее время больше уже посещенного времени для этой деревни, пропускаем
+        if current_time > visited[current_village]:
+            continue
+
+        # Проходим по всем доступным рейсам из текущей деревни
         for departure_time, next_village, arrival_time in graph[current_village]:
-            if current_time <= departure_time:  # Можно успеть на рейс
-                total_time = arrival_time  # Новое время до прибытия в следующую деревню
+            if current_time <= departure_time:
+                total_time = arrival_time  # Учитываем время прибытия в следующую деревню
 
-                # Обновляем время, если нашли более короткий путь
+                # Если нашли более короткое время до следующей деревни, обновляем очередь и visited
                 if total_time < visited[next_village]:
                     visited[next_village] = total_time
                     heapq.heappush(pq, (total_time, next_village))
 
+    # Если не удалось добраться до целевой деревни, возвращаем -1
     return -1
 
 
@@ -59,7 +64,7 @@ if __name__ == "__main__":
 
     # Остальные строки содержат рейсы автобусов
     for line in input_data[1:]:
-        if line.strip():  # Проверяем на пустую строку
+        if line.strip():
             buses.append(list(map(int, line.split())))
 
     if not buses:
