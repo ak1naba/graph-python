@@ -14,32 +14,29 @@ def min_travel_time(n, m, buses):
     pq = []
     visited = defaultdict(lambda: float('inf'))
 
-    # Найдём минимальное время отправления из деревни n
-    min_departure = min((d for d, _, _ in graph[n]), default=None)
-    if min_departure is None:
+    # Запускаем поиск от деревни n с минимальным временем отправления
+    initial_departure = min((d for d, _, _ in graph[n]), default=None)
+    if initial_departure is None:
         return -1
 
-    # Начинаем с минимального времени отправления первого рейса из деревни n
-    heapq.heappush(pq, (min_departure, n))  # (время, деревня)
-    visited[n] = min_departure
+    # Добавляем минимальное время отправления как стартовое
+    heapq.heappush(pq, (initial_departure, n))
+    visited[n] = initial_departure
 
     while pq:
         current_time, current_village = heapq.heappop(pq)
 
-        # Если мы достигли целевой деревни
+        # Если достигли целевой деревни, возвращаем время поездки
         if current_village == m:
-            return current_time - min_departure  # Вернём итоговое время поездки
-
-        # Если текущее время больше уже посещенного времени для этой деревни
-        if current_time > visited[current_village]:
-            continue
+            return current_time - initial_departure
 
         # Обработка всех рейсов из текущей деревни
         for departure_time, next_village, arrival_time in graph[current_village]:
-            if current_time <= departure_time:  # Можно успеть на автобус
-                total_time = arrival_time  # Сразу задаём общее время до прибытия
+            if current_time <= departure_time:  # Можно успеть на рейс
+                total_time = arrival_time  # Новое время до прибытия в следующую деревню
 
-                if total_time < visited[next_village]:  # Проверяем лучшее время для следующей деревни
+                # Обновляем время, если нашли более короткий путь
+                if total_time < visited[next_village]:
                     visited[next_village] = total_time
                     heapq.heappush(pq, (total_time, next_village))
 
